@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .artists-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .artist-card {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .artist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .artist-image {
+            height: 120px;
+            background-color: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .artist-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .artist-info {
+            padding: 15px;
+        }
+        
+        .artist-name {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #4CAF50;
+        }
+        
+        .artist-batch {
+            color: #aaa;
+            font-size: 0.85rem;
+            background: #2a2a2a;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .gallery {
+            display: none;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+        
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .gallery-title {
+            color: #4CAF50;
+            font-size: 1.8rem;
+        }
+        
+        .back-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .back-button:hover {
+            background: #3e8e41;
+        }
+        
+        .artworks {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .artwork {
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .artwork:hover {
+            transform: scale(1.03);
+        }
+        
+        .artwork-image {
+            height: 180px;
+            background-color: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .artwork-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .artwork-info {
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .artwork-title {
+            color: #4CAF50;
+            font-size: 0.95rem;
+        }
+        
+        /* Fullscreen overlay */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .fullscreen-image-container {
+            max-width: 90%;
+            max-height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        
+        .fullscreen-title {
+            color: #4CAF50;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .close-fullscreen {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(76, 175, 80, 0.7);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .close-fullscreen:hover {
+            background: rgba(76, 175, 80, 1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+            color: #666;
+            border-top: 1px solid #333;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .artists-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .artworks {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .artists-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .artworks {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SRISHTI Art Exhibition</h1>
+        <p class="subtitle">Explore artworks by our talented artists. Click on an artist to view their gallery.</p>
+    </header>
+    
+    <main>
+        <div class="artists-container" id="artistsList">
+            <!-- Artist cards will be generated here -->
+        </div>
+        
+        <div class="gallery" id="galleryView">
+            <div class="gallery-header">
+                <h2 class="gallery-title" id="galleryArtistName">Artist Name</h2>
+                <button class="back-button" onclick="showArtistList()">Back to Artists</button>
+            </div>
+            <div class="artworks" id="artworksContainer">
+                <!-- Artworks will be generated here -->
+            </div>
+        </div>
+        
+        <!-- Fullscreen overlay -->
+        <div class="fullscreen-overlay" id="fullscreenOverlay">
+            <div class="close-fullscreen" onclick="closeFullscreen()">×</div>
+            <div class="fullscreen-image-container">
+                <img class="fullscreen-image" id="fullscreenImage" src="" alt="">
+            </div>
+            <h3 class="fullscreen-title" id="fullscreenTitle"></h3>
+        </div>
+    </main>
+    
+    <footer>
+        <p>© 2025 ArC</p>
+    </footer>
+
+    <script>
+        // Sample data for artists and their artworks
+        const artists = [
+            {
+                id: 1,
+                name: "Anuj Arya",
+                batch: "Batch 23",
+                image: "images/Anuj1.webp",
+                artworks: [
+                    { title: "1", image: "images/Anuj1.webp" },
+                    { title: "2", image: "images/Anuj2.webp" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Arya Anshuman Ojha",
+                batch: "Batch 25",
+                image: "images/Arya1.webp",
+                artworks: [
+                    { title: "1", image: "images/Arya1.webp" },
+                    { title: "2", image: "images/Arya2.webp" },
+                    { title: "3", image: "images/Arya3.webp" },
+                    { title: "4", image: "images/Arya4.webp" },
+                    { title: "5", image: "images/Arya5.webp" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Gayatri Panda",
+                batch: "Batch 20",
+                image: "images/Gayatri1.webp",
+                artworks: [
+                    { title: "1", image: "images/Gayatri1.webp" },
+                    { title: "2", image: "images/Gayatri2.webp" },
+                    { title: "3", image: "images/Gayatri3.webp" },
+                    { title: "4", image: "images/Gayatri4.webp" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Kaninika",
+                batch: "",
+                image: "images/Kaninika1.webp",
+                artworks: [
+                    { title: "1", image: "images/Kaninika1.webp" },
+                    { title: "2", image: "images/Kaninika2.webp" },
+                    { title: "3", image: "images/Kaninika3.webp" },
+                    { title: "4", image: "images/Kaninika4.webp" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Kaustav Sarkar",
+                batch: "Batch 23",
+                image: "images/Kaustav1.webp",
+                artworks: [
+                    { title: "1", image: "images/Kaustav1.webp" },
+                    { title: "2", image: "images/Kaustav2.webp" },
+                    { title: "3", image: "images/Kaustav3.webp" },
+                    { title: "4", image: "images/Kaustav4.webp" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Kaustuv Mukherjee",
+                batch: "Postdoc, SBS",
+                image: "images/Kaustuv1.webp",
+                artworks: [
+                    { title: "1", image: "images/Kaustuv1.webp" },
+                    { title: "2", image: "images/Kaustuv2.webp" }
+                ]
+            },
+            {
+                id: 7,
+                name: "Linna Rose Tojan",
+                batch: "Batch 23",
+                image: "images/Linna1.webp",
+                artworks: [
+                    { title: "1", image: "images/Linna1.webp" },
+                    { title: "2", image: "images/Linna2.webp" },
+                    { title: "3", image: "images/Linna3.webp" },
+                    { title: "4", image: "images/Linna4.webp" },
+                    { title: "5", image: "images/Linna5.webp" },
+                ]
+            },
+            {
+                id: 8,
+                name: "Srizon Boruah",
+                batch: "Batch 24",
+                image: "images/Surzon1.webp",
+                artworks: [
+                    { title: "1", image: "images/Surzon1.webp" }
+                ]
+            }
+        ];
+
+        // DOM elements
+        const artistsList = document.getElementById('artistsList');
+        const galleryView = document.getElementById('galleryView');
+        const galleryArtistName = document.getElementById('galleryArtistName');
+        const artworksContainer = document.getElementById('artworksContainer');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const fullscreenTitle = document.getElementById('fullscreenTitle');
+
+        // Generate artist cards
+        function renderArtists() {
+            artistsList.innerHTML = '';
+            artists.forEach(artist => {
+                const card = document.createElement('div');
+                card.className = 'artist-card';
+                card.innerHTML = `
+                    <div class="artist-image">
+                        <img src="${artist.image}" alt="${artist.name}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22100%22%20height%3D%22100%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20fill%3D%22%232a2a2a%22%20width%3D%22100%22%20height%3D%22100%22%2F%3E%3Ctext%20fill%3D%22%234CAF50%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2230%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.35em%22%3E${artist.name.charAt(0)}%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </div>
+                    <div class="artist-info">
+                        <h3 class="artist-name">${artist.name}</h3>
+                        <p class="artist-batch">${artist.batch}</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => showGallery(artist));
+                artistsList.appendChild(card);
+            });
+        }
+
+        // Show gallery for a specific artist
+        function showGallery(artist) {
+            galleryArtistName.textContent = artist.name;
+            artworksContainer.innerHTML = '';
+            
+            artist.artworks.forEach(artwork => {
+                const artworkEl = document.createElement('div');
+                artworkEl.className = 'artwork';
+                artworkEl.innerHTML = `
+                    <div class="artwork-image">
+                        <img src="${artwork.image}" alt="${artwork.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22180%22%20height%3D%22180%22%20viewBox%3D%220%200%20180%20180%22%3E%3Crect%20fill%3D%22%232a2a2a%22%20width%3D%22180%22%20height%3D%22180%22%2F%3E%3Ctext%20fill%3D%22%234CAF50%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2220%22%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dy%3D%22.35em%22%3EArtwork%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    </div>
+                    <div class="artwork-info">
+                        <h4 class="artwork-title">${artwork.title}</h4>
+                    </div>
+                `;
+                
+                // Add click event to show fullscreen
+                artworkEl.addEventListener('click', () => {
+                    showFullscreen(artwork.image, artwork.title);
+                });
+                
+                artworksContainer.appendChild(artworkEl);
+            });
+            
+            artistsList.style.display = 'none';
+            galleryView.style.display = 'block';
+        }
+
+        // Show fullscreen image
+        function showFullscreen(imageSrc, title) {
+            fullscreenImage.src = imageSrc;
+            fullscreenTitle.textContent = title;
+            fullscreenOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        // Close fullscreen
+        function closeFullscreen() {
+            fullscreenOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        }
+
+        // Show the list of artists
+        function showArtistList() {
+            galleryView.style.display = 'none';
+            artistsList.style.display = 'grid';
+        }
+
+        // Close fullscreen when clicking outside the image
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay) {
+                closeFullscreen();
+            }
+        });
+
+        // Close fullscreen with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fullscreenOverlay.style.display === 'flex') {
+                closeFullscreen();
+            }
+        });
+
+        // Initialize the page
+        renderArtists();
+    </script>
+</body>
+</html>
